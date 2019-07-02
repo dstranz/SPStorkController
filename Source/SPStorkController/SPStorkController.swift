@@ -22,15 +22,19 @@
 import UIKit
 
 public enum SPStorkController {
-    
     static public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if let controller = self.controller(for: scrollView) {
-            if let presentationController = controller.presentationController as? SPStorkPresentationController {
+            if let presentationController = self.presentationController(for: controller) {
                 let translation = -(scrollView.contentOffset.y + scrollView.contentInset.top)
                 if translation >= 0 {
                     if controller.isBeingPresented { return }
                     scrollView.subviews.forEach {
                         $0.transform = CGAffineTransform(translationX: 0, y: -translation)
+                    }
+                    if let tableView = scrollView as? UITableView {
+                        tableView.tableHeaderView?.subviews.forEach {
+                            $0.transform = CGAffineTransform(translationX: 0, y: -translation)
+                        }
                     }
                     presentationController.setIndicator(style: scrollView.isTracking ? .line : .arrow)
                     if translation >= presentationController.translateForDismiss * 0.4 {
@@ -74,6 +78,18 @@ public enum SPStorkController {
         }
     }
     
+    static private func presentationController(for controller: UIViewController) -> SPStorkPresentationController? {
+        if let presentationController = controller.presentationController as? SPStorkPresentationController {
+            return presentationController
+        }
+        
+        if let presentationController = controller.parent?.presentationController as? SPStorkPresentationController {
+            return presentationController
+        }
+        
+        return nil
+    }
+    
     static private func controller(for view: UIView) -> UIViewController? {
         var nextResponder = view.next
         while nextResponder != nil && !(nextResponder! is UIViewController) {
@@ -81,4 +97,6 @@ public enum SPStorkController {
         }
         return nextResponder as? UIViewController
     }
+    
+    private init() {}
 }
