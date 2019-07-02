@@ -97,6 +97,4 @@ public enum SPStorkController {
         }
         return nextResponder as? UIViewController
     }
-    
-    private init() {}
 }
