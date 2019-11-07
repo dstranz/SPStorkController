@@ -22,17 +22,20 @@
 import UIKit
 
 public enum SPStorkController {
+    
     static public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if let controller = self.controller(for: scrollView) {
             if let presentationController = self.presentationController(for: controller) {
                 let translation = -(scrollView.contentOffset.y + scrollView.contentInset.top)
                 if translation >= 0 {
                     if controller.isBeingPresented { return }
-                    scrollView.transform = CGAffineTransform(translationX: 0, y: -translation)
+                    scrollView.subviews.forEach {
+                        $0.transform = CGAffineTransform(translationX: 0, y: -translation)
+                    }
                     presentationController.setIndicator(style: scrollView.isTracking ? .line : .arrow)
                     if translation >= presentationController.translateForDismiss * 0.4 {
                         if !scrollView.isTracking && !scrollView.isDragging {
-                            presentationController.presentedViewController.dismiss(animated: true, completion: {
+                            self.dismissWithConfirmation(controller: controller, completion: {
                                 presentationController.storkDelegate?.didDismissStorkBySwipe?()
                             })
                             return
@@ -55,6 +58,14 @@ public enum SPStorkController {
         }
     }
     
+    static public func dismissWithConfirmation(controller: UIViewController, completion: (()->())?) {
+        if let controller = self.presentationController(for: controller) {
+            controller.dismissWithConfirmation(prepare: nil, completion: {
+                completion?()
+            })
+        }
+    }
+    
     static public var topScrollIndicatorInset: CGFloat {
         return 6
     }
@@ -72,6 +83,8 @@ public enum SPStorkController {
     }
     
     static private func presentationController(for controller: UIViewController) -> SPStorkPresentationController? {
+        guard controller.modalPresentationStyle == .custom else { return nil }
+        
         if let presentationController = controller.presentationController as? SPStorkPresentationController {
             return presentationController
         }
@@ -79,7 +92,6 @@ public enum SPStorkController {
         if let presentationController = controller.parent?.presentationController as? SPStorkPresentationController {
             return presentationController
         }
-        
         return nil
     }
     

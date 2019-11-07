@@ -20,7 +20,7 @@ class ModalViewController: UIViewController {
     }
     
     @objc func dismissAction() {
-        self.dismiss()
+        SPStorkController.dismissWithConfirmation(controller: self, completion: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -32,3 +32,20 @@ class ModalViewController: UIViewController {
     }
 }
 
+extension ModalViewController: SPStorkControllerConfirmDelegate {
+    
+    var needConfirm: Bool {
+        return false
+    }
+    
+    func confirm(_ completion: @escaping (Bool) -> ()) {
+        let alertController = UIAlertController(title: "Need dismiss?", message: "It test confirm option for SPStorkController", preferredStyle: .actionSheet)
+        alertController.addDestructiveAction(title: "Confirm", complection: {
+            completion(true)
+        })
+        alertController.addCancelAction(title: "Cancel") {
+            completion(false)
+        }
+        self.present(alertController)
+    }
+}

@@ -9,29 +9,34 @@ You can download example [Debts - Spending tracker](https://itunes.apple.com/app
 
 [![xcode-shop.com](https://github.com/ivanvorobei/SPPermission/blob/master/Resources/Buttons/Xcode%20Shop%20Button%20-%203.svg)](https://xcode-shop.com)
 
-If you like the project, do not forget to `put star ★` or follow me in twitter:
+I am need translate my app [Debts](https://itunes.apple.com/app/id1446635818), if you can help me with it, I can propose you project for free. *Help for help!*
 
-[![https://twitter.com/varabeis](https://github.com/ivanvorobei/SPPermission/blob/master/Resources/Buttons/Twitter-2.svg)](https://twitter.com/varabeis)
+If you like the project, do not forget to `put star ★` and follow me on GitHub:
 
-See project's backers in [Sponsors](https://github.com/ivanvorobei/SPStorkController#sponsors) section.
+[![https://github.com/ivanvorobei](https://github.com/ivanvorobei/SPPermission/blob/master/Resources/Buttons/Follow%20me%20-%2016.svg)](https://github.com/ivanvorobei)
 
 ## Navigate
 
 - [Requirements](#requirements)
 - [Installation](#installation)
+    - [CocoaPods](#cocoapods)
+    - [Carthage](#carthage)
+    - [Swift Package Manager](#swift-package-manager)
+    - [Manually](#manually)
 - [Quick Start](#quick-start)
 - [Usage](#usage)
     - [Light StatusBar](#light-statusbar)
     - [Custom Height](#custom-height)
     - [Close Button](#close-button)
-    - [Indicator](#indicator)
+    - [Arrow Indicator](#arrow-indicator)
     - [Dismissing](#dismissing)
     - [Corner Radius](#corner-radius)
     - [Haptic](#haptic)
     - [Snapshots](#snapshots)
-    - [Add Navigation Bar](#add-navigation-bar)
+    - [Navigation Bar](#navigation-bar)
     - [Working with UIScrollView](#working-with-uiscrollview)
     - [UITableView & UICollectionView](#working-with-uitableview--uicollectionview)
+    - [Confirm before dismiss](#confirm-before-dismiss)
     - [Delegate](#delegate)
     - [Storyboard](#storyboard)
 - [Sheets in iOS 13](#sheets-in-ios-13)
@@ -42,7 +47,6 @@ See project's backers in [Sponsors](https://github.com/ivanvorobei/SPStorkContro
     - [SPPermission](#sppermission)
     - [Awesome iOS UI](https://github.com/ivanvorobei/awesome-ios-ui)
 - [License](#license)
-- [Contact or Order Develop](#contact)
 
 ## Requirements
 
@@ -64,6 +68,16 @@ pod 'SPStorkController'
 
 ```ogdl
 github "ivanvorobei/SPStorkController"
+```
+
+### Swift Package Manager
+
+The [Swift Package Manager](https://swift.org/package-manager/) is a tool for managing the distribution of Swift code. It’s integrated with the Swift build system to automate the process of downloading, compiling, and linking dependencies.
+
+To integrate `SPStorkController` into your Xcode project using Xcode 11, specify it in `Project > Swift Packages`:
+
+```ogdl
+https://github.com/ivanvorobei/SPStorkController
 ```
 
 ### Manually
@@ -140,7 +154,7 @@ Property `showCloseButton` added circle button with dismiss action. Default is `
 transitionDelegate.showCloseButton = false
 ```
 
-### Indicator
+### Arrow Indicator
 
 On the top of controller you can add arrow indicator with animatable states. It simple configure.
 Property `showIndicator` shows or hides top arrow indicator. Default is `true`:
@@ -159,6 +173,12 @@ Property `hideIndicatorWhenScroll` shows or hides indicator when scrolling. Defa
 
 ```swift
 transitionDelegate.hideIndicatorWhenScroll = true
+```
+
+You can set always line or arrow indicator. Set `indicatorMode`:
+
+```swift
+transitionDelegate.indicatorMode = .alwaysLine
 ```
 
 ### Dismissing
@@ -208,7 +228,13 @@ SPStorkController.updatePresentingController(modal: controller)
 
 and pass the controller, which is modal and uses `SPStorkTransitioningDelegate`.
 
-### Add Navigation Bar
+If the parent controller scrollings and you try to show `SPStorkController`, you will see how it froze, and in a second its final position is updated. I recommend before present `SPStorkController`  stop scrolling force:
+
+```swift 
+scrollView.setContentOffset(self.contentOffset, animated: false)
+```
+
+### Navigation Bar
 
 You may want to add a navigation bar to your modal controller. Since it became impossible to change or customize the native controller in swift 4 (I couldn’t even find a way to change the height of the bar), I had to recreate navigation bar from the ground up. Visually it looks real, but it doesn’t execute the necessary functions:
 
@@ -267,6 +293,29 @@ tableView.scrollIndicatorInsets.top = self.navBar.height
 
 Please, also use `SPStorkController.scrollViewDidScroll` function in scroll delegate for more interactiveness with your collection or table view.
 
+### Confirm before dismiss
+
+For confirm closing by swipe, tap around, close button and indicator use `SPStorkControllerConfirmDelegate`. Implenet protocol:
+
+```swift
+@objc public protocol SPStorkControllerConfirmDelegate: class {
+    
+    var needConfirm: Bool { get }
+    
+    func confirm(_ completion: @escaping (_ isConfirmed: Bool)->())
+}
+```
+
+and set `confirmDelegate` property to object, which protocol impleneted. Function `confirm` call if `needConfirm` return true. Pass `isConfirmed` with result. Best options use `UIAlertController` with `.actionSheet` style for confirmation.
+
+If you use custom buttons, in the target use this code:
+
+```swift
+SPStorkController.dismissWithConfirmation(controller: self, completion: nil)
+```
+
+It call `confirm` func and check result of confirmation. See example project for more details.
+
 ### Delegate
 
 You can check events by implement `SPStorkControllerDelegate` and set delegate for `transitionDelegate`:
@@ -318,14 +367,6 @@ controller.modalPresentationStyle = .custom
 
 It’s needed for correct presentation and dismissal of all modal controllers.
 
-### Stop scroll
-
-`SPStorkController` use snapshots. If the parent controller scrollings and you try to show `SPStorkController`, you will see how it froze, and in a second its final position is updated. I recommend to stop scrolling force:
-
-```swift 
-scrollView.setContentOffset(self.contentOffset, animated: false)
-```
-
 ## Sheets in iOS 13
 
 Apple present in `WWDC 2019` new modal presentation style - `Sheets`. It ready use Support interactive dismiss and work with navigations bars. Available since iOS 13. I will add more information when I study this in more detail. You can see presentation [here](https://developer.apple.com/videos/play/wwdc2019/224/).
@@ -375,11 +416,3 @@ You can buy example Dialog & Dinamic animations in [xcode-shop.com](https://xcod
 ## License
 
 `SPStorkController` is released under the MIT license. Check `LICENSE.md` for details.
-
-## Contact
-
-If you need any application or UI to be developed, contact me via [telegram](https://t.me/ivanvorobei). I develop iOS apps and designs. I use `swift`. You can see my apps [in AppStore](https://itunes.apple.com/developer/id1446635817).
-
-If you want to know more about Xcode, UIKit & Design, follow me on twitter:
-
-[![https://twitter.com/varabeis](https://github.com/ivanvorobei/SPPermission/blob/master/Resources/Buttons/Twitter-2.svg)](https://twitter.com/varabeis)
